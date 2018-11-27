@@ -22,6 +22,11 @@ export default new Router({
       path: '/authentication/register',
       name: 'register',
       component: () => import(/* webpackChunkName: "authentication" */ './views/authentication/Register.vue')
+    },
+    {
+      path: '/authentication/login',
+      name: 'login',
+      component: () => import(/* webpackChunkName: "authentication" */ './views/authentication/Login.vue')
     }
   ]
 })

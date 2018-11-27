@@ -36,3 +36,21 @@
     }
   }
 }
+
+.blur-bg {
+  min-width: 1024px;
+  min-height: 100%;
+
+  width: 100%;
+  height: 100%;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  filter: blur(2px) grayscale(0.7);
+}

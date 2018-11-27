@@ -9,8 +9,8 @@
               <AnonLogo/>
             </router-link>
             <h5 class="subheading">
-              <span class="text-uppercase font-weight-medium login__form--title">Register Now</span>
-              <small class="caption login__form--caption">Create your account and enjoy</small>
+              <span class="text-uppercase font-weight-medium login__form--title">Login</span>
+              <small class="caption login__form--caption">Sign in to start your session</small>
             </h5>
             <v-card-text class="pa-0">
               <v-text-field
@@ -21,25 +21,10 @@
                 height="30"
                 validate-on-blur
                 clearable
-                prepend-icon="email"
+                prepend-icon="person"
                 name="email"
                 label="Email"
                 type="email"
-                required
-                autocomplete="off"
-              ></v-text-field>
-              <v-text-field
-                v-model="username"
-                :rules="usernameRules"
-                color="accent"
-                class="login__form--control"
-                height="30"
-                validate-on-blur
-                clearable
-                prepend-icon="person"
-                name="username"
-                label="Username"
-                type="text"
                 required
                 autocomplete="off"
               ></v-text-field>
@@ -58,29 +43,14 @@
                 required
                 autocomplete="off"
               ></v-text-field>
-              <v-text-field
-                v-model="password_confirmation"
-                :rules="password_confirmationRules"
-                color="accent"
-                class="login__form--control"
-                height="30"
-                validate-on-blur
-                clearable
-                prepend-icon="lock_outline"
-                name="password_confirmation"
-                label="Password Confirmation"
-                type="password"
-                required
-                autocomplete="off"
-              ></v-text-field>
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn flat type="submit" color="info">Register</v-btn>
+              <v-btn flat type="submit" color="info">Login</v-btn>
             </v-card-actions>
             <v-card-text>
-              <p class="login__form--footer">Already have an account?
-                <router-link to="/authentication/login">Sign In</router-link>
+              <p class="login__form--footer">Not yet a memeber?
+                <router-link to="/authentication/register">Register</router-link>
               </p>
             </v-card-text>
           </v-form>
@@ -95,7 +65,7 @@ import AnonLogo from '@/components/AnonLogo'
 import AuthService from '@/services/AuthService'
 
 export default {
-  name: 'AuthenticationRegister',
+  name: 'AuthenticationLogin',
   components: {
     AnonLogo
   },
@@ -107,11 +77,6 @@ export default {
         v => !!v || 'E-mail is required',
         v => /.+@.+/.test(v) || 'E-mail must be valid'
       ],
-      username: '',
-      usernameRules: [
-        v => !!v || 'Username is required',
-        v => v.length >= 2 || 'Username must be greater than 2 characters'
-      ],
       password: '',
       passwordRules: [
         v => !!v || 'Password is required',
@@ -119,25 +84,14 @@ export default {
           /^[a-zA-Z0-9]{2,32}$/.test(v) ||
           'Passwords must contain ONLY the following characters: lower case, upper case, numerics',
         v => v.length >= 2 || 'Password must be greater than 2 characters'
-      ],
-      password_confirmation: '',
-      password_confirmationRules: [
-        v => !!v || 'Password confirmation is required',
-        v => v === this.password || 'Password does not match'
       ]
     }
   },
   methods: {
-    async getToken(userObj, userData) {
+    async getUser() {
       try {
-        const userToken = await AuthService.login({
-          auth: {
-            email: userObj.email,
-            password: userObj.password
-          }
-        })
-        this.$store.dispatch('setUser', userData)
-        this.$store.dispatch('setToken', userToken.data.jwt)
+        const userObj = await AuthService.get(`users/${this.email}`)
+        this.$store.dispatch('setUser', userObj.data)
         this.$router.push('/')
       } catch (error) {
         this.$store.dispatch('setAlerts', error.response.data)
@@ -146,18 +100,15 @@ export default {
     async submit(e) {
       e.preventDefault()
       if (this.$refs.form.validate()) {
-        const userObj = {
-          user: {
-            email: this.email,
-            username: this.username,
-            password: this.password,
-            password_confirmation: this.password_confirmation,
-            admin: false
-          }
-        }
         try {
-          const userResponse = await AuthService.register(userObj)
-          this.getToken(userObj.user, userResponse.data)
+          const userToken = await AuthService.login({
+            auth: {
+              email: this.email,
+              password: this.password
+            }
+          })
+          this.$store.dispatch('setToken', userToken.data.jwt)
+          this.getUser()
         } catch (error) {
           this.$store.dispatch('setAlerts', error.response.data)
         }
